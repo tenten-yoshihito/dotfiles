@@ -1,0 +1,24 @@
+{
+  "vim.vimrc.enable": true,
+  "vim.vimrc.path": "~/.vimrc",
+  
+  // VS Code側のCtrl+n/p/f/bなどのショートカットをVimに奪わせない設定
+  "vim.handleKeys": {
+    "<C-n>": false,
+    "<C-p>": false,
+    "<C-f>": false,
+    "<C-b>": false,
+    "<C-a>": false,
+    "<C-e>": false
+  },
+
+  // その他お好みで（Vimの検索ハイライトをVS Codeと同期するなど）
+  "vim.hlsearch": true,
+  "editor.lineNumbers": "on",
+"editor.cursorStyle": "block",
+"gitlens.ai.model": "vscode",
+"gitlens.ai.vscode.model": "copilot:gpt-4.1",
+"terminal.integrated.fontFamily": "'HackGen Console NF'",
+"atlascode.rovodev.showEntitlementNotifications": false,
+"claudeCode.preferredLocation": "panel"
+}

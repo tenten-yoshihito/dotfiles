@@ -1,0 +1,56 @@
+// 既定値を上書きするには、このファイル内にキー バインドを挿入
+[
+  // Ctrl+n: 補完があれば次を選択、なければ下に移動
+  {
+    "key": "ctrl+n",
+    "command": "selectNextSuggestion",
+    "when": "editorTextFocus && suggestWidgetVisible"
+  },
+  {
+    "key": "ctrl+n",
+    "command": "cursorDown",
+    "when": "editorTextFocus && vim.active && vim.mode == 'Insert' && !suggestWidgetVisible"
+  },
+
+  // Ctrl+p: 補完があれば前を選択、なければ上に移動
+  {
+    "key": "ctrl+p",
+    "command": "selectPrevSuggestion",
+    "when": "editorTextFocus && suggestWidgetVisible"
+  },
+  {
+    "key": "ctrl+p",
+    "command": "cursorUp",
+    "when": "editorTextFocus && vim.active && vim.mode == 'Insert' && !suggestWidgetVisible"
+  },
+
+  // その他のEmacsバインド（Insertモード時）
+  {
+    "key": "ctrl+f",
+    "command": "cursorRight",
+    "when": "editorTextFocus && vim.active && vim.mode == 'Insert'"
+  },
+  {
+    "key": "ctrl+b",
+    "command": "cursorLeft",
+    "when": "editorTextFocus && vim.active && vim.mode == 'Insert'"
+  },
+  {
+    "key": "ctrl+a",
+    "command": "cursorLineStart",
+    "when": "editorTextFocus && vim.active && vim.mode == 'Insert'"
+  },
+  {
+    "key": "ctrl+e",
+    "command": "cursorLineEnd",
+    "when": "editorTextFocus && vim.active && vim.mode == 'Insert'"
+  },
+  {
+    "key": "cmd+[IntlYen]",
+    "command": "workbench.action.splitEditorRight"
+  },
+  {
+    "key": "cmd+k ctrl+alt+cmd+[IntlYen]",
+    "command": "-workbench.action.splitEditorRight"
+  }
+]
