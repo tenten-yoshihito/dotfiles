@@ -24,7 +24,7 @@
     "when": "editorTextFocus && vim.active && vim.mode == 'Insert' && !suggestWidgetVisible"
   },
 
-  // その他のEmacsバインド（Insertモード時）
+  // Emacsバインド（Insertモード時）
   {
     "key": "ctrl+f",
     "command": "cursorRight",
@@ -45,6 +45,13 @@
     "command": "cursorLineEnd",
     "when": "editorTextFocus && vim.active && vim.mode == 'Insert'"
   },
+  {
+    "key": "ctrl+d",
+    "command": "deleteRight",
+    "when": "editorTextFocus && vim.active && vim.mode == 'Insert'"
+  },
+
+  // ウィンドウ操作
   {
     "key": "cmd+[IntlYen]",
     "command": "workbench.action.splitEditorRight"
