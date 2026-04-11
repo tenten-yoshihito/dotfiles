@@ -75,6 +75,9 @@ set hlsearch
 nmap <Esc><Esc> :nohlsearch<CR><Esc>
 
 
+" クリップボード連携
+set clipboard=unnamed
+
 " InsertモードでEmacs風の移動を有効化
 inoremap <C-p> <Up>
 inoremap <C-n> <Down>
