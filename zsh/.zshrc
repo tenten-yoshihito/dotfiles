@@ -28,7 +28,7 @@ fi
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-# --- 6. キーバインド (ここが重要！) ---
+# --- 6. キーバインド  ---
 # Tabキー(^I)を補完に戻す
 bindkey '^I' expand-or-complete
 # 提案の確定は「右矢印キー」または「Ctrl + F」に割り当て
@@ -53,6 +53,23 @@ setopt share_history
 alias clip='pbcopy'
 alias paste='pbpaste'
 
+chrome() {
+    # 引数（URLまたはファイル名）がない場合は、普通にChromeを開く
+    if [ -z "$1" ]; then
+        open -a "Google Chrome" --args --incognito
+        return
+    fi
+
+    # 入力された文字列が「http」で始まるか、または実際のファイルとして存在するかチェック
+    if [[ "$1" =~ ^https?:// ]] || [ -e "$1" ]; then
+        # そのまま開く
+        open -a "Google Chrome" "$1" --args --incognito
+    else
+        # 相対パス（例: index.html）を絶対パスに変換して開く（Chromeのバグ対策）
+        open -a "Google Chrome" "$(greadlink -f "$1" 2>/dev/null || realpath "$1")" --args --incognito
+    fi
+}
+
 # --- 11. 外部ツールの初期化 ---
 # nodenv
 if builtin command -v nodenv > /dev/null; then
@@ -72,3 +89,4 @@ fi
 # --- 12. ssh ---
 # 初回起動時に鍵を追加（パスフレーズ入力を省く）
 ssh-add --apple-use-keychain ~/.ssh/id_rsa 2>/dev/null
+export PATH="/Library/TeX/texbin:$PATH"

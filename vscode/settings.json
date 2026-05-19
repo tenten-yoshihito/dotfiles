@@ -18,6 +18,7 @@
 
   "editor.lineNumbers": "on",
   "editor.cursorStyle": "block",
+  "editor.fontFamily": "'JetBrainsMono Nerd Font Mono'",
   "editor.smoothScrolling": true,
   "editor.renderLineHighlight": "all",
 
@@ -26,7 +27,29 @@
 
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
-  "terminal.integrated.fontFamily": "'HackGen Console NF'",
-  "atlascode.rovodev.showEntitlementNotifications": false,
-  "claudeCode.preferredLocation": "panel"
+  "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font Mono'",
+  "claudeCode.preferredLocation": "panel",
+
+  "latex-workshop.latex.recipe.default": "lastUsed",
+  "latex-workshop.latex.recipes": [
+    {
+        "name": "latexmk (lualatex)",
+        "tools": [
+            "lualatexmk"
+        ]
+    }
+],
+"latex-workshop.latex.tools": [
+    {
+        "name": "lualatexmk",
+        "command": "latexmk",
+        "args": [
+            "-lualatex",
+            "-synctex=1",
+            "-interaction=nonstopmode",
+            "-file-line-error",
+            "%DOC%"
+        ]
+    }
+  ]
 }
