@@ -51,5 +51,7 @@
             "%DOC%"
         ]
     }
-  ]
+],
+"python.analysis.typeCheckingMode": "basic",
+"explorer.confirmDragAndDrop": false
 }

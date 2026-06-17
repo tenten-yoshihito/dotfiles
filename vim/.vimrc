@@ -83,7 +83,12 @@ inoremap <C-p> <Up>
 inoremap <C-n> <Down>
 inoremap <C-b> <Left>
 inoremap <C-f> <Right>
+" 削除
+inoremap <C-d> <Delete>
+inoremap <C-k> <C-o>D
 
+" ヤンク（貼り付け）
+inoremap <expr> <C-y> pumvisible() ? "\<C-y>" : "\<C-r>\""
 " ついでにあると便利な移動系
 inoremap <C-a> <Home>
 inoremap <C-e> <End>

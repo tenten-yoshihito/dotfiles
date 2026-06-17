@@ -52,6 +52,12 @@ setopt share_history
 # --- 10. カスタムエイリアス ---
 alias clip='pbcopy'
 alias paste='pbpaste'
+alias theme='~/Desktop/Theme'
+alias dwn='~/Downloads'
+alias paper='~/Desktop/Theme/papers'
+alias ver-1='~/Desktop/Theme/ver-1'
+alias zsh='vi ~/.zshrc'
+
 
 chrome() {
     # 引数（URLまたはファイル名）がない場合は、普通にChromeを開く
@@ -90,3 +96,6 @@ fi
 # 初回起動時に鍵を追加（パスフレーズ入力を省く）
 ssh-add --apple-use-keychain ~/.ssh/id_rsa 2>/dev/null
 export PATH="/Library/TeX/texbin:$PATH"
+
+# -- 13. option --
+setopt AUTO_CD
