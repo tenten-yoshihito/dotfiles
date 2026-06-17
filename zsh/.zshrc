@@ -2,7 +2,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # --- 1. 補完パスの設定 (compinitより前に書く必要があるもの) ---
 # Dockerの補完などを読み込みパスに追加
-fpath=(/Users/nakata-yoshihito/.docker/completions $fpath)
+fpath=(/Users/yo.nakata/.docker/completions $fpath)
 
 # --- 2. 補完とカラー設定 ---
 autoload -Uz compinit && compinit
@@ -28,12 +28,24 @@ fi
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-# --- 6. キーバインド  ---
+# --- 6. キーバインド ---
+# Emacsライク操作（VSCode terminalでも確実に動くよう明示）
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^K' kill-line
+bindkey '^U' backward-kill-line
+bindkey '^W' backward-kill-word
+bindkey '^B' backward-char
+bindkey '^F' forward-char
+bindkey '^P' up-line-or-history
+bindkey '^N' down-line-or-history
+bindkey '^D' delete-char-or-list
+
+
 # Tabキー(^I)を補完に戻す
 bindkey '^I' expand-or-complete
-# 提案の確定は「右矢印キー」または「Ctrl + F」に割り当て
+# 提案の確定は右矢印キーに割り当て
 bindkey '^[[C' autosuggest-accept
-bindkey '^F' autosuggest-accept
 
 # --- 7. fzf の連携 ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -76,6 +88,14 @@ chrome() {
     fi
 }
 
+settoken() {
+    if [ -z "$1" ]; then
+      echo "トークンを指定してください ex) settoken <JWT>"
+    else
+        export AUTH_TOKEN="$1"
+        echo "AUTH_TOKEN を更新しました"
+    fi
+}
 # --- 11. 外部ツールの初期化 ---
 # nodenv
 if builtin command -v nodenv > /dev/null; then
@@ -95,7 +115,14 @@ fi
 # --- 12. ssh ---
 # 初回起動時に鍵を追加（パスフレーズ入力を省く）
 ssh-add --apple-use-keychain ~/.ssh/id_rsa 2>/dev/null
+
+# --- 13. その他の環境設定 ---
+export EDITOR="vim"
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+export PATH=/opt/homebrew/share/google-cloud-sdk/bin:"$PATH"
+export PATH=/opt/homebrew/opt/libpq/bin:"$PATH"
 export PATH="/Library/TeX/texbin:$PATH"
 
-# -- 13. option --
+# -- 14. option --
 setopt AUTO_CD
