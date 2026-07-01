@@ -53,5 +53,6 @@
     }
 ],
 "python.analysis.typeCheckingMode": "basic",
-"explorer.confirmDragAndDrop": false
+"explorer.confirmDragAndDrop": false,
+"workbench.startupEditor": "none"
 }

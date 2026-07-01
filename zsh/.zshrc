@@ -12,6 +12,7 @@ zstyle ':completion:*' menu select
 
 # --- 3. eza の設定 ---
 if builtin command -v eza > /dev/null; then
+  alias l='eza --icons --group-directories-first'
   alias ls='eza --icons --group-directories-first'
   alias ll='eza -hl --icons --git --group-directories-first'
   alias la='eza -a --icons --group-directories-first'
@@ -25,9 +26,13 @@ if builtin command -v bat > /dev/null; then
 fi
 
 # --- 5. プラグインの読み込み (補完設定の後に書く) ---
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
 
+if [ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
 # --- 6. キーバインド ---
 # Emacsライク操作（VSCode terminalでも確実に動くよう明示）
 bindkey '^A' beginning-of-line
@@ -64,12 +69,17 @@ setopt share_history
 # --- 10. カスタムエイリアス ---
 alias clip='pbcopy'
 alias paste='pbpaste'
+
 alias theme='~/Desktop/Theme'
 alias dwn='~/Downloads'
 alias paper='~/Desktop/Theme/papers'
 alias ver-1='~/Desktop/Theme/ver-1'
+alias memo='~/Desktop/Theme/memos'
+alias dino='~/Desktop/Theme/dinov2'
+
 alias zsh='vi ~/.zshrc'
 
+alias gb='git branch'
 
 chrome() {
     # 引数（URLまたはファイル名）がない場合は、普通にChromeを開く
