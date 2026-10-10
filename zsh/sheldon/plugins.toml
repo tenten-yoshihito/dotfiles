@@ -1,0 +1,8 @@
+# Neko-nos/configs plugin set; keep the existing prompt instead of Powerlevel10k.
+shell = "zsh"
+[plugins.zsh_completions]
+github = "zsh-users/zsh-completions"
+[plugins.zsh_autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+[plugins.zsh_syntax_highlighting]
+github = "zsh-users/zsh-syntax-highlighting"

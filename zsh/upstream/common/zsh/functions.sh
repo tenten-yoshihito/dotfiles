@@ -1,0 +1,355 @@
+# Top-level `set -euo pipefail` would not apply when these functions run later
+# and could change the caller's options if this file is sourced directly.
+# Each function instead combines `emulate -L zsh` with `ERR_RETURN` to localize
+# option changes and stop on command failure without exiting the caller's shell.
+
+autoload -Uz __warn
+
+# cdr customization
+if [[ -n $(echo ${^fpath}/chpwd_recent_dirs(N)) && -n $(echo ${^fpath}/cdr(N)) ]]; then
+    autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
+    add-zsh-hook chpwd chpwd_recent_dirs
+    zstyle ':completion:*' recent-dirs-insert both
+    zstyle ':chpwd:*' recent-dirs-default true
+    zstyle ':chpwd:*' recent-dirs-max 1000
+    zstyle ':chpwd:*' recent-dirs-file "$HOME/.cache/chpwd-recent-dirs"
+fi
+
+# Handle with environment variables so that it can be switched during shell session
+typeset -g _cdr_search_warned_unsupported=0
+
+#######################################
+# Emit a warning once per session for cdr search.
+# Globals:
+#   _cdr_search_warned_unsupported
+# Arguments:
+#   1: Warning message
+# Outputs:
+#   Writes warning to stderr
+# Returns:
+#   0 always
+#######################################
+function _search_cdr_warn_once() {
+    emulate -L zsh
+    setopt err_return
+    local message="${1}"
+    if ((_cdr_search_warned_unsupported != 0)); then
+        return 0
+    fi
+    _cdr_search_warned_unsupported=1
+    __warn "${message}"
+}
+
+#######################################
+# Search recent directories and populate the command line with a cd command.
+# Globals:
+#   FILTER_CMD
+# Arguments:
+#   None
+# Outputs:
+#   None
+# Returns:
+#   0 on success, non-zero on failure.
+#######################################
+function search-cdr() {
+    emulate -L zsh
+    setopt err_return
+    local -a filter_cmd
+    if [[ -n "${FILTER_CMD:-}" ]]; then
+        filter_cmd=(${(z)FILTER_CMD})
+    elif command -v fzf >/dev/null 2>&1; then
+        filter_cmd=(fzf)
+    else
+        _search_cdr_warn_once "FILTER_CMD is not set and fzf is unavailable."
+        return 0
+    fi
+    local selected_dir="$(cdr -l | sed 's/^[0-9]\+ \+//' | awk '!a[$0]++' | "${filter_cmd[@]}" --prompt="cdr >" --query "$LBUFFER")"
+    if [[ -n "${selected_dir}" ]]; then
+        BUFFER="cd ${selected_dir}"
+        zle accept-line
+    fi
+}
+zle -N search-cdr
+bindkey '^p' search-cdr
+
+# Handle with environment variables so that it can be switched during shell session
+typeset -g _history_search_warned_unsupported=0
+
+#######################################
+# Emit a warning once per session for history search.
+# Globals:
+#   _history_search_warned_unsupported
+# Arguments:
+#   1: Warning message
+# Outputs:
+#   Writes warning to stderr
+# Returns:
+#   0 always
+#######################################
+function _history_search_warn_once() {
+    emulate -L zsh
+    setopt err_return
+    local message="${1}"
+    if ((_history_search_warned_unsupported != 0)); then
+        return 0
+    fi
+    _history_search_warned_unsupported=1
+    __warn "${message}"
+}
+
+#######################################
+# Emit history entries as NUL-delimited records, preserving multiline commands.
+# Globals:
+#   HISTFILE
+# Arguments:
+#   None
+# Outputs:
+#   Writes NUL-delimited entries to stdout
+# Returns:
+#   0 on success, non-zero on failure.
+#######################################
+function _history_entries_nul() {
+    emulate -L zsh
+    setopt err_return
+    local histfile="${HISTFILE:-$HOME/.zsh_history}"
+    if [[ -z "${histfile}" || ! -f "${histfile}" ]]; then
+        return 1
+    fi
+
+    zmodload zsh/parameter
+    local histsize="${HISTSIZE:-10000}"
+    fc -p -a "${histfile}" "${histsize}" 0
+
+    local -A seen
+    local -a event_numbers
+    event_numbers=("${(@kon)history}")
+    local i
+    for ((i = ${#event_numbers[@]}; i >= 1; i--)); do
+        local entry="${history[${event_numbers[i]}]}"
+        if ((! ${+seen[${entry}]})); then
+            seen[${entry}]=1
+            print -rn -- "${entry}"$'\0'
+        fi
+    done
+}
+
+#######################################
+# Search history entries using an external filter.
+# Globals:
+#   FILTER_CMD
+#   HISTFILE
+# Arguments:
+#   None
+# Outputs:
+#   None
+# Returns:
+#   0 on success, non-zero on failure.
+#######################################
+function search-history() {
+    emulate -L zsh
+    setopt err_return
+    local -a filter_cmd
+    if [[ -n "${FILTER_CMD:-}" ]]; then
+        filter_cmd=(${(z)FILTER_CMD})
+    elif command -v fzf >/dev/null 2>&1; then
+        filter_cmd=(fzf)
+    else
+        _history_search_warn_once "FILTER_CMD is not set and fzf is unavailable."
+        return 0
+    fi
+
+    local cmd_name="${filter_cmd[1]}"
+    local supports_nul=0
+    case "$cmd_name" in
+        fzf | fzf-tmux | sk | skim)
+            supports_nul=1
+            ;;
+        *)
+            supports_nul=0
+            ;;
+    esac
+
+    if ((supports_nul == 0)); then
+        _history_search_warn_once "FILTER_CMD must support NUL-delimited input to preserve multiline history."
+        return 0
+    fi
+
+    # Use NUL-delimited input instead of newline-delimited input to handle multiline commands correctly.
+    local selection="$(_history_entries_nul | "${filter_cmd[@]}" --read0 --query "${LBUFFER}")"
+    if [[ -n "${selection}" ]]; then
+        selection="${selection%$'\n'}"
+        BUFFER="${selection}"
+        CURSOR=${#BUFFER}
+    fi
+    zle clear-screen
+}
+zle -N search-history
+bindkey '^r' search-history
+
+# ref: https://qiita.com/momo-lab/items/523fc83fbfa39fa5fd60
+function replace_multiple_dots() {
+    emulate -L zsh
+    setopt err_return
+    local dots=$LBUFFER[-2,-1]
+    if [[ $dots == ".." ]]; then
+        LBUFFER=$LBUFFER[1,-3]'../.'
+    fi
+    zle self-insert
+}
+zle -N replace_multiple_dots
+bindkey "." replace_multiple_dots
+
+# ref: https://qiita.com/mollifier/items/26c67347734f9fcda274
+function show-options() {
+    emulate -L zsh
+    setopt err_return
+    zmodload zsh/parameter
+
+    local option
+    for option in "${(@ok)options}"; do
+        printf "%-24s %s\n" "${option}" "${options[$option]}"
+    done
+}
+
+#######################################
+# Run Ruff autofix (linter), import sorting, and formatting for the given targets.
+# Arguments:
+#   Ruff target paths or options.
+# Outputs:
+#   Writes Ruff output to stdout and stderr
+# Returns:
+#   0 if all Ruff commands succeed, non-zero otherwise.
+#######################################
+function ruff-fix() {
+    emulate -L zsh
+    setopt err_return
+    if (($# == 0)); then
+        printf "usage: ruff-fix <path-or-ruff-options>...\n" >&2
+        return 2
+    fi
+
+    local -a ruff_cmd
+    if command -v ruff >/dev/null 2>&1; then
+        ruff_cmd=(ruff)
+    elif command -v uv >/dev/null 2>&1; then
+        ruff_cmd=(uv run ruff)
+    elif command -v uvx >/dev/null 2>&1; then
+        ruff_cmd=(uvx ruff)
+    else
+        printf "ruff-fix: ruff, uv, and uvx are unavailable.\n" >&2
+        return 127
+    fi
+
+    "${ruff_cmd[@]}" check "$@" --fix
+    "${ruff_cmd[@]}" check "$@" --fix --select I
+    "${ruff_cmd[@]}" format "$@"
+}
+
+if ((${+commands[tree]})); then
+    #######################################
+    # Print a directory tree, limiting its depth when invoked from home.
+    # Globals:
+    #   HOME
+    #   PWD
+    # Arguments:
+    #   Tree arguments.
+    # Outputs:
+    #   Writes the directory tree to stdout
+    # Returns:
+    #   Tree's exit status.
+    #######################################
+    function tree() {
+        emulate -L zsh
+        setopt err_return
+
+        if [[ "${PWD}" == "${HOME}" ]]; then
+            command tree -L 2 "$@"
+        else
+            command tree "$@"
+        fi
+    }
+fi
+
+if ((${+commands[docker]})); then
+    #######################################
+    # Run Docker commands and rebuild an image from a build context.
+    # Arguments:
+    #   Docker arguments, or `rebuild <image> <context>` to replace an image.
+    # Outputs:
+    #   Writes Docker output to stdout and stderr
+    # Returns:
+    #   0 if the command succeeds, non-zero otherwise.
+    #######################################
+    function docker() {
+        emulate -L zsh
+        setopt err_return
+        if [[ "${1:-}" != "rebuild" ]]; then
+            command docker "$@"
+            return
+        fi
+        if (($# != 3)); then
+            printf "usage: docker rebuild <image> <context>\n" >&2
+            return 2
+        fi
+
+        local image_name="${2}"
+        local context="${3}"
+        command docker image rm "${image_name}"
+        command docker build --tag "${image_name}" "${context}"
+    }
+fi
+
+if ((${+commands[packer]})); then
+    #######################################
+    # Run Packer commands and rebuild a Tart VM from a template.
+    # Arguments:
+    #   Packer arguments, or `rebuild <VM> <template>` to replace a Tart VM.
+    # Outputs:
+    #   Writes Tart and Packer output to stdout and stderr
+    # Returns:
+    #   0 if the command succeeds, non-zero otherwise.
+    #######################################
+    function packer() {
+        emulate -L zsh
+        setopt err_return
+        if [[ "${1:-}" != "rebuild" ]]; then
+            command packer "$@"
+            return
+        fi
+        if (($# != 3)); then
+            printf "usage: packer rebuild <VM> <template>\n" >&2
+            return 2
+        fi
+
+        local vm_name="${2}"
+        local template="${3}"
+        command tart delete "${vm_name}"
+        command packer init "${template}"
+        command packer build -var "vm_name=${vm_name}" "${template}"
+    }
+fi
+
+if ((${+commands[tart]})); then
+    #######################################
+    # Run Tart commands and share the current directory with VMs.
+    # Globals:
+    #   PWD
+    # Arguments:
+    #   Tart arguments.
+    # Outputs:
+    #   Writes Tart output to stdout and stderr
+    # Returns:
+    #   Tart's exit status.
+    #######################################
+    function tart() {
+        emulate -L zsh
+        setopt err_return
+        if [[ "${1:-}" != "run" ]]; then
+            command tart "$@"
+            return
+        fi
+
+        shift
+        command tart run --dir="${PWD##*/}:${PWD}" "$@"
+    }
+fi

@@ -1,0 +1,42 @@
+autoload -Uz __safe_alias __warn __update_cache
+
+typeset -ga SAFE_ALIAS_INSTALL_CMD SAFE_ALIAS_UPDATE_CMD
+# Use arrays for commands to avoid word-splitting and quoting pitfalls.
+if ((${#SAFE_ALIAS_INSTALL_CMD[@]} == 0)); then
+    if [[ "${OSTYPE}" == "darwin"* ]]; then
+        SAFE_ALIAS_INSTALL_CMD=(brew install)
+        SAFE_ALIAS_UPDATE_CMD=()
+    else
+        SAFE_ALIAS_INSTALL_CMD=(sudo apt-get install)
+        SAFE_ALIAS_UPDATE_CMD=(sudo apt-get update)
+    fi
+fi
+
+# ref: https://atmarkit.itmedia.co.jp/ait/articles/1606/28/news021.html
+__safe_alias ls 'ls -AX --color=auto'
+
+# Custom colors for ls and completion
+function __load_ls_color_cache() {
+    local ls_color_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zshrc/ls_color_cache.zsh"
+    local dircolors_file="${HOME}/.dircolors-solarized/dircolors.ansi-light"
+    __update_cache "dircolors" "${ls_color_cache}" "${dircolors_file}" -- "${dircolors_file}" || true
+    source "${ls_color_cache}"
+}
+__load_ls_color_cache
+unset -f __load_ls_color_cache
+
+if [[ -n "$LS_COLORS" ]]; then
+    zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+fi
+
+# ref: https://atmarkit.itmedia.co.jp/ait/articles/1802/01/news025.html
+__safe_alias tree 'tree -acq -I ".git|.ruff_cache|.pytest_cache|.venv|__pycache__|.DS_Store"'
+
+__safe_alias diff 'colordiff -u'
+__safe_alias icdiff 'icdiff -U 1 --line-numbers'
+
+# Clean up helper functions and variables.
+# `__update_cache` is cleaned up by `.zshrc` after startup. `__warn` stays
+# available for interactive functions that may warn after startup.
+unset -f __safe_alias
+unset -v SAFE_ALIAS_INSTALL_CMD SAFE_ALIAS_UPDATE_CMD
