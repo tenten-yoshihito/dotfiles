@@ -23,10 +23,7 @@
   "editor.renderLineHighlight": "all",
 
   "workbench.editor.enablePreview": false,
-  "files.trimTrailingWhitespace": true,
-
-  "gitlens.ai.model": "vscode",
-  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+"files.trimTrailingWhitespace": true,
   "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font Mono'",
   "claudeCode.preferredLocation": "panel",
 
@@ -54,5 +51,11 @@
 ],
 "python.analysis.typeCheckingMode": "basic",
 "explorer.confirmDragAndDrop": false,
-"workbench.startupEditor": "none"
+"workbench.startupEditor": "none",
+"github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+}
 }

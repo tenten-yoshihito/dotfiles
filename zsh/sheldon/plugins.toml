@@ -1,4 +1,4 @@
-# Neko-nos/configs plugin set; keep the existing prompt instead of Powerlevel10k.
+# Neko-nos/configs plugin set, with a locally styled Powerlevel10k prompt.
 shell = "zsh"
 [plugins.zsh_completions]
 github = "zsh-users/zsh-completions"
@@ -6,3 +6,5 @@ github = "zsh-users/zsh-completions"
 github = "zsh-users/zsh-autosuggestions"
 [plugins.zsh_syntax_highlighting]
 github = "zsh-users/zsh-syntax-highlighting"
+[plugins.powerlevel10k]
+github = "romkatv/powerlevel10k"

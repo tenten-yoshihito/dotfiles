@@ -1,0 +1,32 @@
+# Use Neko-nos's Git formatter with the existing two-line prompt and colors.
+# Git markers: + staged, ! unstaged, ? untracked, ⇡ ahead, ⇣ behind, * stashes.
+source "$ZSH_CONFIG_ROOT/upstream/Mac/.p10k.zsh"
+
+typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(personal_header vcs newline prompt_char)
+typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=()
+typeset -g POWERLEVEL9K_BACKGROUND=
+typeset -g POWERLEVEL9K_LEFT_SEGMENT_SEPARATOR=
+typeset -g POWERLEVEL9K_LEFT_SUBSEGMENT_SEPARATOR=
+typeset -g POWERLEVEL9K_LEFT_PROMPT_FIRST_SEGMENT_START_SYMBOL=
+typeset -g POWERLEVEL9K_LEFT_PROMPT_LAST_SEGMENT_END_SYMBOL=
+typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX=
+typeset -g POWERLEVEL9K_MULTILINE_NEWLINE_PROMPT_PREFIX=
+typeset -g POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX=
+typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_SUFFIX=
+typeset -g POWERLEVEL9K_MULTILINE_NEWLINE_PROMPT_SUFFIX=
+typeset -g POWERLEVEL9K_MULTILINE_LAST_PROMPT_SUFFIX=
+typeset -g POWERLEVEL9K_PERSONAL_HEADER_LEFT_{LEFT,RIGHT}_WHITESPACE=
+typeset -g POWERLEVEL9K_VCS_LEFT_LEFT_WHITESPACE=' '
+typeset -g POWERLEVEL9K_VCS_LEFT_RIGHT_WHITESPACE=
+typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=magenta
+typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_{VIINS,VICMD,VIVIS,VIOWR}_CONTENT_EXPANSION='❯'
+typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=false
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
+typeset -g POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+# Keep generated configuration out of the vendored upstream file.
+typeset -g POWERLEVEL9K_CONFIG_FILE="$ZSH_CONFIG_ROOT/prompt.zsh"
+
+function prompt_personal_header() {
+    p10k segment -f cyan -t '%n%f@%F{green}%m%f:%F{yellow}%~%f'
+}
+p10k reload

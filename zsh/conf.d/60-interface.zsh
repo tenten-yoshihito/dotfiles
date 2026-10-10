@@ -20,9 +20,12 @@ bindkey '^[[C' autosuggest-accept
 # --- 7. fzf の連携 ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# --- 8. プロンプト ---
+# --- 8. プロンプト (Powerlevel10kがない場合のフォールバック) ---
 PROMPT='%F{cyan}%n%f@%F{green}%m%f:%F{yellow}%~%f
 %F{magenta}❯%f '
+if (( $+functions[p10k] )); then
+    source "$ZSH_CONFIG_ROOT/prompt.zsh"
+fi
 
 
 # Additional upstream word-navigation keys; preserve Ctrl+W and Ctrl+Z behavior.
